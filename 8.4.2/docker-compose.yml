@@ -1,0 +1,39 @@
+services:
+  # Servicio de MYSQL
+  mysqldb_8_4_2:
+    image: mysql:8.4.2
+    container_name: mysqldb_8_4_2
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql$123root # Establece una contraseña segura
+      MYSQL_USER: mysql_user
+      MYSQL_PASSWORD: mysql$123password
+    ports:
+      - 3307:3306
+    volumes:
+      - ./.container/database:/var/lib/mysql # Volumen para persistir los datos de MySQL
+      - ./config/sql:/docker-entrypoint-initdb.d/sql # Volumen donde estarán los scripts SQL
+      - ./config/bash/restore-databases.sh:/docker-entrypoint-initdb.d/restore-databases.sh # Script que restaurará las bases de datos
+    networks:
+      - mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "root",
+          "-p$${MYSQL_ROOT_PASSWORD}",
+        ]
+      interval: 10s # Cada cuánto tiempo se ejecuta el healthcheck
+      timeout: 5s # Tiempo de espera de cada intento
+      retries: 5 # Número de reintentos antes de marcar el contenedor como unhealthy
+      start_period: 30s # Tiempo de espera antes de empezar a realizar los healthchecks
+
+networks:
+  mysql:
+    name: mysql
+    driver: bridge

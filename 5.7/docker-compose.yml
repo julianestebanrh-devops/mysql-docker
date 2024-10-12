@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+  mysqldb:
+    container_name: mysqldb
+    image: mysql:5.7
+    # env_file: ./config/.env
+
+networks:
+  global_network:
+    name: global_network
